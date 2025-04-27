@@ -1,0 +1,73 @@
+/*document.addEventListener('DOMContentLoaded', () => {
+  const token = localStorage.getItem('token');
+  //const ordersTable = document.getElementById('ordersTable');
+  const tableBody = document.getElementById('ordersTableBody'); // This targets <tbody>
+  const messageBox = document.getElementById('message');
+
+  if (!token) {
+    alert('Please log in.');
+    window.location.href = '/index.html';
+    return;
+  }*/
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const token = localStorage.getItem('token');
+      const guestView = localStorage.getItem('guest_view');
+      const tableBody = document.getElementById('ordersTableBody'); // This targets <tbody>
+      const messageBox = document.getElementById('message');
+    
+      if (!token && guestView !== 'true') {
+        alert('Please log in.');
+        window.location.href = '/index.html';
+        return;
+      }
+    
+      if (guestView === 'true') {
+        console.log('Admin is viewing as Guest.');
+        // Optional: disable sensitive actions like Delete, Edit, etc.
+      } else {
+        console.log('User is logged in normally.');
+      }
+    
+    
+
+  fetch('/api/orders', {
+    headers: {
+      'Authorization': 'Bearer ' + token
+    }
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (Array.isArray(data) && data.length > 0) {
+        /*data.forEach(order => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${order.food_name}</td>
+            <td>${order.quantity}</td>
+            <td>${order.donor_name}</td>
+            <td>${order.recipient_name}</td>
+            <td>${new Date(order.order_date).toLocaleString()}</td>
+          `;
+          ordersTable.appendChild(row);
+        });*/
+        data.forEach(order => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${order.food_name}</td>
+            <td>${order.quantity}</td>
+            <td>${order.donor_name} (${order.donor_email})</td>
+            <td>${order.donor_address}</td>
+            <td>${order.recipient_name}</td>
+            <td>${new Date(order.order_date).toLocaleString()}</td>
+          `;
+          tableBody.appendChild(row);
+        });
+      } else {
+        messageBox.innerHTML = `<div class="alert alert-warning text-center">No orders found.Only recipients can view their orders.</div>`;
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      messageBox.innerHTML = `<div class="alert alert-danger">Error loading orders.</div>`;
+    });
+});
